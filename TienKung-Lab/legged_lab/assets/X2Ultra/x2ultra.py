@@ -50,7 +50,7 @@ X2ULTRA_CFG = ArticulationCfg(
             max_depenetration_velocity=1.0,
         ),
         articulation_props=sim_utils.ArticulationRootPropertiesCfg(
-            enabled_self_collisions=True,
+            enabled_self_collisions=False,
             solver_position_iteration_count=4,
             solver_velocity_iteration_count=4,
         ),
@@ -60,39 +60,39 @@ X2ULTRA_CFG = ArticulationCfg(
         # 初始高度约 0.85m（pelvis 离地高度）
         pos=(0.0, 0.0, 0.85),
         joint_pos={
-            # ===== 腿部关节 =====
-            # hip_pitch: 轻微前倾，使膝盖微弯
-            ".*_hip_pitch_joint": -0.20,
-            # hip_roll: 保持直立，轻微内收
-            ".*_hip_roll_joint": 0.0,
-            # hip_yaw: 脚尖朝前
-            ".*_hip_yaw_joint": 0.0,
-            # knee: 微弯，配合 hip_pitch 保持重心
-            ".*_knee_joint": 0.42,
-            # ankle_pitch: 补偿 hip+knee 的前倾角度
-            ".*_ankle_pitch_joint": -0.23,
-            # ankle_roll: 保持脚底水平
-            ".*_ankle_roll_joint": 0.0,
-            # ===== 腰部关节 =====
+            # ===== 腿部关节（来自 x2ultra_config.json）=====
+            "right_hip_pitch_joint": -0.25,
+            "right_hip_roll_joint": -0.01,
+            "right_hip_yaw_joint": -0.01,
+            "right_knee_joint": 0.45,
+            "right_ankle_pitch_joint": -0.1,
+            "right_ankle_roll_joint": 0.0,
+            "left_hip_pitch_joint": -0.25,
+            "left_hip_roll_joint": -0.01,
+            "left_hip_yaw_joint": -0.01,
+            "left_knee_joint": 0.45,
+            "left_ankle_pitch_joint": -0.1,
+            "left_ankle_roll_joint": 0.0,
+            # ===== 腰部关节（来自 x2ultra_config.json）=====
             "waist_yaw_joint": 0.0,
             "waist_pitch_joint": 0.0,
             "waist_roll_joint": 0.0,
-            # ===== 手臂关节 =====
-            # shoulder_pitch: 手臂自然下垂，轻微前摆
-            "left_shoulder_pitch_joint": 0.35,
-            "right_shoulder_pitch_joint": 0.35,
-            # shoulder_roll: 左臂轻微外展，右臂轻微内收（对称）
-            "left_shoulder_roll_joint": 0.18,
-            "right_shoulder_roll_joint": -0.18,
-            # shoulder_yaw: 中立位
-            ".*_shoulder_yaw_joint": 0.0,
-            # elbow: 轻微弯曲，自然姿态
-            ".*_elbow_joint": -0.87,
-            # wrist: 中立位
-            ".*_wrist_yaw_joint": 0.0,
-            ".*_wrist_pitch_joint": 0.0,
-            ".*_wrist_roll_joint": 0.0,
-            # ===== 头部关节 =====
+            # ===== 手臂关节（来自 x2ultra_config.json）=====
+            "right_shoulder_pitch_joint": 0.4,
+            "right_shoulder_roll_joint": 0.0,
+            "right_shoulder_yaw_joint": 0.0,
+            "right_elbow_joint": -1.2,
+            "right_wrist_yaw_joint": 0.0,
+            "right_wrist_pitch_joint": 0.0,
+            "right_wrist_roll_joint": 0.0,
+            "left_shoulder_pitch_joint": 0.4,
+            "left_shoulder_roll_joint": 0.0,
+            "left_shoulder_yaw_joint": 0.0,
+            "left_elbow_joint": -1.2,
+            "left_wrist_yaw_joint": 0.0,
+            "left_wrist_pitch_joint": 0.0,
+            "left_wrist_roll_joint": 0.0,
+            # ===== 头部关节（来自 x2ultra_config.json）=====
             "head_yaw_joint": 0.0,
             "head_pitch_joint": 0.0,
         },
@@ -130,18 +130,22 @@ X2ULTRA_CFG = ArticulationCfg(
                 ".*waist_roll_joint": 13.088,
             },
             stiffness={
-                ".*_hip_yaw_joint": 150.0,
-                ".*_hip_roll_joint": 150.0,
-                ".*_hip_pitch_joint": 200.0,
-                ".*_knee_joint": 200.0,
-                ".*waist.*": 200.0,
+                ".*_hip_yaw_joint": 100.0,
+                ".*_hip_roll_joint": 100.0,
+                ".*_hip_pitch_joint": 100.0,
+                ".*_knee_joint": 150.0,
+                ".*waist_yaw_joint": 40.0,
+                ".*waist_pitch_joint": 40.0,
+                ".*waist_roll_joint": 40.0,
             },
             damping={
-                ".*_hip_yaw_joint": 5.0,
-                ".*_hip_roll_joint": 5.0,
-                ".*_hip_pitch_joint": 5.0,
+                ".*_hip_yaw_joint": 3.0,
+                ".*_hip_roll_joint": 3.0,
+                ".*_hip_pitch_joint": 4.0,
                 ".*_knee_joint": 5.0,
-                ".*waist.*": 5.0,
+                ".*waist_yaw_joint": 8.0,
+                ".*waist_pitch_joint": 5.0,
+                ".*waist_roll_joint": 5.0,
             },
             armature=0.01,
         ),
@@ -161,8 +165,8 @@ X2ULTRA_CFG = ArticulationCfg(
                 ".*_ankle_pitch_joint": 13.087,
                 ".*_ankle_roll_joint": 15.077,
             },
-            stiffness=20.0,
-            damping=2.0,
+            stiffness={".*_ankle_pitch_joint": 40.0, ".*_ankle_roll_joint": 30.0},
+            damping={".*_ankle_pitch_joint": 3.0, ".*_ankle_roll_joint": 2.0},
             armature=0.01,
         ),
         # ===== 肩关节（pitch/roll）=====
@@ -180,8 +184,8 @@ X2ULTRA_CFG = ArticulationCfg(
                 ".*_shoulder_pitch_joint": 13.088,
                 ".*_shoulder_roll_joint": 13.088,
             },
-            stiffness=100.0,
-            damping=2.0,
+            stiffness={".*_shoulder_pitch_joint": 80.0, ".*_shoulder_roll_joint": 40.0},
+            damping={".*_shoulder_pitch_joint": 4.0, ".*_shoulder_roll_joint": 1.0},
             armature=0.01,
         ),
         # ===== 手臂关节（shoulder_yaw / elbow）=====
@@ -200,8 +204,8 @@ X2ULTRA_CFG = ArticulationCfg(
                 ".*_shoulder_yaw_joint": 15.077,
                 ".*_elbow_joint": 15.077,
             },
-            stiffness=50.0,
-            damping=2.0,
+            stiffness={".*_shoulder_yaw_joint": 40.0, ".*_elbow_joint": 40.0},
+            damping={".*_shoulder_yaw_joint": 1.0, ".*_elbow_joint": 1.0},
             armature=0.01,
         ),
         # ===== 腕关节 =====
@@ -223,8 +227,8 @@ X2ULTRA_CFG = ArticulationCfg(
                 ".*_wrist_pitch_joint": 4.188,
                 ".*_wrist_roll_joint": 4.188,
             },
-            stiffness=40.0,
-            damping=2.0,
+            stiffness={".*_wrist_yaw_joint": 40.0, ".*_wrist_pitch_joint": 40.0, ".*_wrist_roll_joint": 40.0},
+            damping={".*_wrist_yaw_joint": 1.0, ".*_wrist_pitch_joint": 1.0, ".*_wrist_roll_joint": 1.0},
             armature=0.01,
         ),
         # ===== 头部关节 =====
@@ -243,8 +247,8 @@ X2ULTRA_CFG = ArticulationCfg(
                 "head_yaw_joint": 6.019,
                 "head_pitch_joint": 6.28,
             },
-            stiffness=10.0,
-            damping=1.0,
+            stiffness={"head_yaw_joint": 20.0, "head_pitch_joint": 20.0},
+            damping={"head_yaw_joint": 1.0, "head_pitch_joint": 1.0},
             armature=0.01,
         ),
     },

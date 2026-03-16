@@ -253,6 +253,11 @@ class X2UltraFlatEnvCfg(BaseEnvCfg):
             "torso_link"
         ]
 
+        # 约束关节重置随机化范围，防止生成扭曲初始姿态
+        if hasattr(self, "domain_rand") and hasattr(self.domain_rand.events, "reset_robot_joints"):
+            if self.domain_rand.events.reset_robot_joints is not None:
+                self.domain_rand.events.reset_robot_joints.params["position_range"] = (0.95, 1.05)
+
 
 @configclass
 class X2UltraFlatAgentCfg(BaseAgentCfg):

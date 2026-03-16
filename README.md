@@ -1,13 +1,5 @@
 # 添加的功能
-
-  # 平地训练
-  python TienKung-Lab/legged_lab/scripts/train.py --task x2ultra_flat
-
-  # 崎岖地形
-  python TienKung-Lab/legged_lab/scripts/train.py --task x2ultra_rough
-
-  # DreamWaQ 盲行
-  python TienKung-Lab/legged_lab/scripts/train.py --task x2ultra_dwaq
+(g1dwaq) suzumiyaharuhi@suzumiyaharuhi-ASUS-TUF-Gaming-F16-FX607JV-FX607JV:~/Desktop/ckx_DreamWaq/G1DWAQ_Lab$ python TienKung-Lab/legged_lab/scripts/ain.py --task x2ultra_dwaq --headless
 
 
 # G1 DWAQ 盲走上台阶
