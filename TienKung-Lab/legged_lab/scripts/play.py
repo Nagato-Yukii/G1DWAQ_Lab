@@ -276,6 +276,34 @@ def play():
     env_class = task_registry.get_task_class(env_class_name)
     env = env_class(env_cfg, args_cli.headless)
 
+    # ==========================================
+    # 【EL PSY KONGROO】 记忆读取探针 V2.0
+    # ==========================================
+    print("\n" + "="*70)
+    print("正在强行解析 PhysX 底层 Articulation 的真实关节张量顺序...")
+    try:
+        # 绕过愚蠢的容器迭代器，直接暴力提取 robot 实体
+        if hasattr(env, 'unwrapped') and hasattr(env.unwrapped, 'scene'):
+            robot = env.unwrapped.scene["robot"]
+        elif hasattr(env, 'scene'):
+            robot = env.scene["robot"]
+        else:
+            robot = env.robot
+            
+        true_dof_names = robot.data.joint_names
+        
+        print("\n请将以下数组完整复制到你的 sim2sim_x2ultra.py 中，作为绝对的 LAB_DOF_NAMES：\n")
+        print("LAB_DOF_NAMES = [")
+        for i, name in enumerate(true_dof_names):
+            print(f"    '{name}',  # 绝对索引 {i}")
+        print("]")
+    except Exception as e:
+        print(f"探针读取失败，追踪异常: {e}")
+    print("="*70 + "\n")
+    import sys
+    # sys.exit(0)
+    # ==========================================
+
     log_root_path = os.path.join("logs", agent_cfg.experiment_name)
     log_root_path = os.path.abspath(log_root_path)
     print(f"[INFO] Loading experiment from directory: {log_root_path}")

@@ -571,6 +571,35 @@ class G1DwaqMujocoRunner:
             while self.viewer.is_running() and self.data.time < self.cfg.sim.sim_duration:
                 # 获取当前观测
                 current_obs = self.get_current_obs()
+
+                # =========================================================
+                # 【EL PSY KONGROO】 绝对观测域初次快照 (仅在第一帧打印并终止)
+                # =========================================================
+                if debug_counter == 0:
+                    print("\n" + "="*70)
+                    print("【观测向量解剖报告】 (期望总维度: 106)")
+                    print(f"实际维度: {len(current_obs)}")
+                    
+                    print(f"\n[0:3] 角速度 ang_vel: {current_obs[0:3]}")
+                    print(f"[3:6] 投影重力 proj_gravity: {current_obs[3:6]}")
+                    print(f"[6:9] 速度命令 commands: {current_obs[6:9]}")
+                    
+                    print("\n[9:40] 关节位置偏差 joint_pos_err (31维):")
+                    for i, name in enumerate(LAB_DOF_NAMES):
+                        print(f"  {i:2d} | {name:28s} : {current_obs[9+i]:>8.4f}")
+                        
+                    print("\n[40:71] 关节速度 joint_vel (31维):")
+                    for i, name in enumerate(LAB_DOF_NAMES):
+                        print(f"  {i:2d} | {name:28s} : {current_obs[40+i]:>8.4f}")
+                        
+                    print(f"\n[71:102] 上一步动作 actions: {current_obs[71:102][:5]} ... (仅显示前5个)")
+                    print(f"[102:106] 步态相位 gait_phase: {current_obs[102:106]}")
+                    print("="*70 + "\n")
+                    
+                    # 拿到第一帧数据后立刻切断时间线，方便你慢慢核对
+                    import sys
+                    #sys.exit(0)
+                # =========================================================
                 
                 # 归一化当前观测
                 current_obs_normalized = self.normalize_obs(current_obs)
