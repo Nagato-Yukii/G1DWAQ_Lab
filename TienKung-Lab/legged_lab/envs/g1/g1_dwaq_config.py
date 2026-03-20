@@ -307,46 +307,105 @@ class G1DwaqEnvCfg(BaseEnvCfg):
         # 外力扰动 - 暂时禁用
 
 
-@configclass  
+@configclass
 class G1DwaqAgentCfg(BaseAgentCfg):
     """
     G1 DWAQ agent configuration.
-    
+
     Uses DWAQOnPolicyRunner with ActorCritic_DWAQ policy.
     The policy includes:
     - VAE encoder for latent state extraction from observation history
     - Actor network using observation + latent code
     - Critic network using privileged observations
     - Decoder for observation reconstruction (VAE loss)
-    
+
     Training adds autoencoder loss on top of standard PPO loss:
     - Velocity estimation loss: MSE between predicted and true velocity
-    - Reconstruction loss: MSE between decoded and actual observations  
+    - Reconstruction loss: MSE between decoded and actual observations
     - KL divergence: β-VAE regularization on latent space
-    
+
     DWAQ Architecture Parameters:
     - cenet_out_dim: Output dimension of encoder = velocity_dim(3) + latent_dim(16) = 19
     - The encoder predicts velocity (3 dims) and latent representation (16 dims)
     - The latent code is concatenated with observations for actor input
+
+    [H-Infinity Plugin] runner 已切换为 DWAQHInfRunner，启用对抗 Disturber 训练。
+    若要回退到纯 DWAQ，将 runner_class_name 改回 "DWAQOnPolicyRunner" 并注释 disturber 赋值。
     """
     experiment_name: str = "g1_dwaq"
     wandb_project: str = "g1_dwaq"
-    runner_class_name: str = "DWAQOnPolicyRunner"
+    # [H-Infinity Plugin] 使用集成了 Disturber 的 Runner
+    # 原始值: runner_class_name: str = "DWAQOnPolicyRunner"
+    runner_class_name: str = "DWAQHInfRunner"
 
     def __post_init__(self):
         super().__post_init__()
-        
+
         # Use ActorCritic_DWAQ policy with VAE encoder
         self.policy.class_name = "ActorCritic_DWAQ"
         self.policy.init_noise_std = 1.0  # 增强早期探索（原版 DreamWaQ 默认值）
         self.policy.actor_hidden_dims = [512, 256, 128]
         self.policy.critic_hidden_dims = [512, 256, 128]
-        
+
         # DWAQ encoder output dimension: velocity(3) + latent(16) = 19
         # This is the key DWAQ architecture parameter
         self.policy.cenet_out_dim = 19
-        
+
         # Use DWAQPPO algorithm (PPO + autoencoder loss)
         self.algorithm.class_name = "DWAQPPO"
         # Match original DreamWaQ entropy coefficient (default is 0.005)
         self.algorithm.entropy_coef = 0.01
+
+        # [H-Infinity Plugin] Disturber 超参数
+        # train.py 通过 agent_cfg.to_dict() 将此字段传入 DWAQHInfRunner 的 train_cfg["disturber"]
+        # disturber_obs_dim 必须与实际 num_obs 一致:
+        #   gait_phase.enable=True  → 82 (78基础 + sin/cos各2)
+        #   gait_phase.enable=False → 78
+        self.disturber = {
+            "disturber_obs_dim": 82,         # 与 G1DwaqEnvCfg.robot.gait_phase.enable 保持一致
+            "eta": 80.0, #50.0,                     # 外力 L2 范数上界 (N)，建议从 50N 开始逐步增大
+            "apply_body_name": "torso_link", # 施力 body（G1 躯干质心）
+            "warmup_iterations": 500,        # 前 500 iter 不启用 Disturber
+            "actor_hidden_dims": [256, 128, 64],
+            "critic_hidden_dims": [256, 128, 64],
+            "force_dim": 3,
+            "disturber_lr": 3e-4,
+            "lagrangian_lr": 1e-3,
+            "lambda_init": 1.0,
+            "lambda_min": 0.1, #0.0,
+            "lambda_max": 10.0,
+            "clip_param": 0.2,
+            "gamma": 0.99,
+            "lam": 0.95,
+            "value_loss_coef": 1.0,
+            "num_learning_epochs": 1,
+            "num_mini_batches": 4,
+            "max_grad_norm": 1.0,
+            "cost_lin_vel_weight": 1.0,
+            "cost_ang_vel_weight": 0.5,
+            "epsilon_greedy": 0.2, #0.2的Epsilon-Greedy Exploration
+        }
+
+
+# ===========================================================================
+# [H-Infinity Plugin] G1 DWAQ + H-Infinity 任务专用 Agent 配置
+# ===========================================================================
+
+@configclass
+class G1DwaqHInfAgentCfg(G1DwaqAgentCfg):
+    """
+    G1 DWAQ + H-Infinity Disturber 任务配置。
+
+    完全继承 G1DwaqAgentCfg（包含 DWAQHInfRunner、disturber 超参数等），
+    仅修改 experiment_name 以区分日志目录。
+
+    对应任务名: "g1_dwaq_hinf"
+    日志目录:   logs/g1_dwaq_hinf/
+
+    与 g1_dwaq 的唯一区别:
+      - runner_class_name = "DWAQHInfRunner"（已在父类中设置）
+      - experiment_name   = "g1_dwaq_hinf"（本类覆盖）
+      - disturber 超参数  = {...}（已在父类 __post_init__ 中设置）
+    """
+    experiment_name: str = "g1_dwaq_hinf"
+    wandb_project: str = "g1_dwaq_hinf"

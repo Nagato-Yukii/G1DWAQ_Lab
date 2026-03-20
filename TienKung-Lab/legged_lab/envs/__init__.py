@@ -45,6 +45,8 @@ from legged_lab.envs.g1.g1_dwaq_env import G1DwaqEnv
 from legged_lab.envs.g1.g1_dwaq_config import (
     G1DwaqAgentCfg,
     G1DwaqEnvCfg,
+    # [H-Infinity Plugin] H-Infinity 任务配置
+    G1DwaqHInfAgentCfg,
 )
 
 from legged_lab.envs.h1.h1_config import (
@@ -85,6 +87,8 @@ task_registry.register("h1_rough", BaseEnv, H1RoughEnvCfg(), H1RoughAgentCfg())
 task_registry.register("g1_flat", BaseEnv, G1FlatEnvCfg(), G1FlatAgentCfg())
 task_registry.register("g1_rough", G1Env, G1RoughEnvCfg(), G1RoughAgentCfg())
 task_registry.register("g1_dwaq", G1DwaqEnv, G1DwaqEnvCfg(), G1DwaqAgentCfg())
+# [H-Infinity Plugin] g1_dwaq_hinf：与 g1_dwaq 完全相同的环境，使用 DWAQHInfRunner 进行对抗训练
+task_registry.register("g1_dwaq_hinf", G1DwaqEnv, G1DwaqEnvCfg(), G1DwaqHInfAgentCfg())
 
 # X2Ultra 任务注册
 task_registry.register("x2ultra_flat", X2UltraEnv, X2UltraFlatEnvCfg(), X2UltraFlatAgentCfg())

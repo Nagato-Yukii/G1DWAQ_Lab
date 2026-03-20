@@ -21,5 +21,7 @@
 from .amp_on_policy_runner import AmpOnPolicyRunner
 from .on_policy_runner import OnPolicyRunner
 from .dwaq_on_policy_runner import DWAQOnPolicyRunner
+# [H-Infinity Plugin] DWAQHInfRunner 继承 DWAQOnPolicyRunner，集成对抗 Disturber 训练
+from .ppo_trainer_patch import DWAQHInfRunner
 
-__all__ = ["OnPolicyRunner", "AmpOnPolicyRunner", "DWAQOnPolicyRunner"]
+__all__ = ["OnPolicyRunner", "AmpOnPolicyRunner", "DWAQOnPolicyRunner", "DWAQHInfRunner"]

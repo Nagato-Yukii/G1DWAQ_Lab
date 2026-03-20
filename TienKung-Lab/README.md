@@ -32,6 +32,8 @@ The codebase is built on IsaacLab, supports Sim2Sim transfer to MuJoCo, and feat
 - [x] Motion retargeting support 2025-09-27
 - [x] Add sim2real demo 2025-11-07
 - [x] Add a hyperlink to the deployment [repository](https://github.com/Open-X-Humanoid/Deploy_Tienkung.git) 2025-11-19
+- [x] G1 DreamWaQ blind walking (g1_dwaq) 2026-01
+- [x] H-Infinity Disturber for robust locomotion (g1_dwaq_hinf) 2026-03
 - [ ] Add more sensors
 - [ ] Add Perceptive Control
 
@@ -127,6 +129,32 @@ Train the policy using AMP expert data from tienkung/datasets/motion_amp_expert.
 python legged_lab/scripts/train.py --task=walk --headless --logger=tensorboard --num_envs=4096
 python legged_lab/scripts/train.py --task=run --headless --logger=tensorboard --num_envs=4096
 ```
+
+### G1 DreamWaQ (Blind Walking)
+
+Train the G1 robot with DreamWaQ (β-VAE encoder for blind terrain traversal):
+
+```bash
+# Standard DreamWaQ
+python legged_lab/scripts/train.py --task g1_dwaq --headless --logger tensorboard --num_envs 4096
+
+# DreamWaQ + H-Infinity Disturber (robust training)
+python legged_lab/scripts/train.py --task g1_dwaq_hinf --headless --logger tensorboard --num_envs 4096
+```
+
+Resume from checkpoint:
+
+```bash
+python legged_lab/scripts/train.py \
+  --task g1_dwaq_hinf \
+  --num_envs 4096 \
+  --headless \
+  --resume True \
+  --load_run <timestamp_dir> \
+  --checkpoint model_9999.pt
+```
+
+For full details on the H-Infinity plugin, see [Hinf.md](./Hinf.md).
 
 ### Play
 

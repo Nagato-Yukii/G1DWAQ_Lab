@@ -22,6 +22,8 @@ from isaaclab.app import AppLauncher
 
 from legged_lab.utils import task_registry
 from rsl_rl.runners import AmpOnPolicyRunner, OnPolicyRunner, DWAQOnPolicyRunner
+# [H-Infinity Plugin] 导入 DWAQHInfRunner，使 eval(runner_class_name) 能找到它
+from rsl_rl.runners import DWAQHInfRunner  # noqa: F401
 
 # local imports
 import legged_lab.utils.cli_args as cli_args  # isort: skip

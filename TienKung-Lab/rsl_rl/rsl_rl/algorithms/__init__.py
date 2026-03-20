@@ -22,5 +22,7 @@ from .amp_ppo import AMPPPO
 from .distillation import Distillation
 from .ppo import PPO
 from .dwaq_ppo import DWAQPPO
+# [H-Infinity Plugin] HInfDisturberPlugin 及配置类
+from .hinf_disturber import HInfDisturberPlugin, HInfDisturberCfg
 
-__all__ = ["PPO", "Distillation", "AMPPPO", "DWAQPPO"]
+__all__ = ["PPO", "Distillation", "AMPPPO", "DWAQPPO", "HInfDisturberPlugin", "HInfDisturberCfg"]
