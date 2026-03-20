@@ -48,9 +48,13 @@ class HInfDisturberCfg:
     force_dim: int = 3
 
     # --- H-Infinity 约束 ---
-    # η: 外力 L2 范数上界 (单位: N)
-    # 论文建议从 100N 开始，逐步增大
-    eta: float = 50.0
+    # η: 单帧物理极限暴击力上界 (单位: N)，用于 step() 中 L2 Clamp，保留一击破坏重心的能力
+    # 论文建议从 100N 开始，逐步增大；此处上调为 150N 以释放 Disturber 的爆发潜力
+    eta: float = 150.0
+    # δ: Lagrangian 约束用的全局平均能量预算 (单位: N)
+    # 与 η 解耦：Disturber 多数帧须保持 ||f|| ≈ 0 以满足 E[||f||] ≤ δ，
+    # 从而在 G1 重心脆弱瞬间"暴击"出接近 η 的瞬时力（Emergent Sparsity）
+    delta: float = 30.0
 
     # --- 优化器 ---
     disturber_lr: float = 3e-4
@@ -762,11 +766,11 @@ class HInfDisturberPlugin:
             disturber_critic_loss = (ret_b - cost_value_new).pow(2).mean()
 
             # ---- Step 1d: Lagrangian 约束项（论文公式 11）----
-            # 约束: E[||d(s_t)||] ≤ η
-            # 违约量: E[||d||] - η（正值表示违约）
+            # 约束: E[||d(s_t)||] ≤ δ  （能量预算，与物理上限 η 解耦）
+            # 违约量: E[||d||] - δ（正值表示违约）
             # 当前 batch 的平均力范数
             force_norms = forces_b.norm(dim=-1, keepdim=True)  # [B, 1]
-            constraint_violation = force_norms.mean() - self.cfg.eta
+            constraint_violation = force_norms.mean() - self.cfg.delta
 
             # Lagrangian 松弛：L = L_disturber + λ * constraint_violation
             # λ 当前值（detach，不让 λ 的梯度影响 Disturber 网络）
@@ -787,7 +791,7 @@ class HInfDisturberPlugin:
             self.optimizer.step()
 
             # ---- Step 2: 更新 Lagrangian 乘子 λ（论文公式 12）----
-            # λ 的更新方向：若约束被违反（force_norm > η），增大 λ；反之减小
+            # λ 的更新方向：若平均力超过能量预算 δ，增大 λ；反之减小
             # 梯度下降：λ ← λ - α * ∂L/∂λ = λ - α * (-constraint_violation)
             # 即：λ ← λ + α * constraint_violation
             # 使用 Adam 优化器自动处理学习率

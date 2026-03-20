@@ -363,7 +363,9 @@ class G1DwaqAgentCfg(BaseAgentCfg):
         #   gait_phase.enable=False → 78
         self.disturber = {
             "disturber_obs_dim": 82,         # 与 G1DwaqEnvCfg.robot.gait_phase.enable 保持一致
-            "eta": 80.0, #50.0,                     # 外力 L2 范数上界 (N)，建议从 50N 开始逐步增大
+            "eta": 150.0,                    # 单帧物理极限暴击力 (N)，仅用于 step() L2 Clamp
+            "delta": 30.0,                   # 全局平均能量预算 (N)，Lagrangian 约束阈值
+                                             # η >> δ → 多数帧沉默，偶尔爆发（Emergent Sparsity）
             "apply_body_name": "torso_link", # 施力 body（G1 躯干质心）
             "warmup_iterations": 500,        # 前 500 iter 不启用 Disturber
             "actor_hidden_dims": [256, 128, 64],
@@ -372,7 +374,7 @@ class G1DwaqAgentCfg(BaseAgentCfg):
             "disturber_lr": 3e-4,
             "lagrangian_lr": 1e-3,
             "lambda_init": 1.0,
-            "lambda_min": 0.1, #0.0,
+            "lambda_min": 0.1,
             "lambda_max": 10.0,
             "clip_param": 0.2,
             "gamma": 0.99,
@@ -383,7 +385,7 @@ class G1DwaqAgentCfg(BaseAgentCfg):
             "max_grad_norm": 1.0,
             "cost_lin_vel_weight": 1.0,
             "cost_ang_vel_weight": 0.5,
-            "epsilon_greedy": 0.2, #0.2的Epsilon-Greedy Exploration
+            "epsilon_greedy": 0.2,           # ε-Greedy 探索概率，打破方向性模式坍缩
         }
 
 
